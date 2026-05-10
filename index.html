@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdsPay BD - Pro</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #00a884;
+            --dark-green: #056162;
+            --bg: #f0f2f5;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            margin: 0; padding: 0; user-select: none;
+        }
+
+        .app-bar {
+            background: var(--primary-green); color: white; padding: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .card { background: white; margin: 12px; border-radius: 15px; padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+
+        .btn {
+            background: var(--primary-green); color: white; border: none; padding: 14px;
+            border-radius: 12px; width: 100%; font-weight: bold; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* বিজ্ঞাপন প্রদর্শনের বক্স - আপনার ভিডিওর মতো */
+        #ad-display-box {
+            min-height: 300px;
+            width: 100%;
+            background: #ffffff;
+            border: 2px dashed #00a884;
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page { display: none; padding-bottom: 90px; }
+        .page.active { display: block; }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; border-top: 1px solid #eee; }
+        .nav-item { text-align: center; font-size: 11px; color: #8e8e93; flex: 1; padding: 10px 0; }
+        .nav-item.active { color: var(--primary-green); }
+    </style>
+</head>
+<body>
+
+<div class="app-bar">
+    <div>
+        <b id="u-name">ইউজার</b><br>
+        <small>ব্যালেন্স: ৳<span id="balance-val">0.00</span></small>
+    </div>
+    <i class="fas fa-crown" style="color:gold;"></i>
+</div>
+
+<div id="earn" class="page active">
+    <div class="card" style="text-align:center;">
+        <p>প্রতি ক্লিকে নিশ্চিত আয়</p>
+        <h2 style="color:var(--primary-green); font-size:35px; margin:10px;">৳৫.০০</h2>
+        
+        <div id="ad-display-box">
+            <div id="ad-content-wrapper">
+                <p id="ad-placeholder-text">বিজ্ঞাপন এখানে লোড হবে</p>
+            </div>
+        </div>
+
+        <button class="btn" id="start-btn" onclick="triggerAd()">
+            <i class="fas fa-play"></i> বিজ্ঞাপন শুরু করুন
+        </button>
+        
+        <button class="btn" id="claim-btn" style="display:none;" disabled onclick="collectMoney()">
+            টাকা সংগ্রহ করুন
+        </button>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item active"><i class="fas fa-play"></i><br>কাজ করুন</div>
+</div>
+
+<script>
+    let balance = parseFloat(localStorage.getItem('userBalance')) || 0;
+    document.getElementById('balance-val').innerText = balance.toFixed(2);
+
+    function triggerAd() {
+        const adWrapper = document.getElementById('ad-content-wrapper');
+        const startBtn = document.getElementById('start-btn');
+        const claimBtn = document.getElementById('claim-btn');
+        
+        // ১. বাটন পরিবর্তন
+        startBtn.style.display = 'none';
+        claimBtn.style.display = 'flex';
+        claimBtn.disabled = true;
+
+        // ২. বিজ্ঞাপন লোড করা (আপনার SDK ব্যবহার করে)
+        adWrapper.innerHTML = ""; // আগের কিছু থাকলে মুছে ফেলা
+        const adScript = document.createElement('script');
+        adScript.src = "//libtl.com/sdk.js";
+        adScript.setAttribute('data-zone', '10981207');
+        adScript.setAttribute('data-sdk', 'show_10981207');
+        
+        // স্ক্রিপ্টটি বক্সে যুক্ত করা
+        adWrapper.appendChild(adScript);
+
+        // ৩. ৫ সেকেন্ডের টাইমার
+        let timeLeft = 5;
+        let timer = setInterval(() => {
+            claimBtn.innerText = `অপেক্ষা করুন (${timeLeft}s)`;
+            timeLeft--;
+            if (timeLeft < 0) {
+                clearInterval(timer);
+                claimBtn.disabled = false;
+                claimBtn.innerText = "টাকা সংগ্রহ করুন";
+            }
+        }, 1000);
+    }
+
+    function collectMoney() {
+        balance += 5.0;
+        localStorage.setItem('userBalance', balance);
+        document.getElementById('balance-val').innerText = balance.toFixed(2);
+        
+        alert("অভিনন্দন! ৫ টাকা যোগ হয়েছে।");
+        
+        // রিসেট করা
+        document.getElementById('start-btn').style.display = 'flex';
+        document.getElementById('claim-btn').style.display = 'none';
+        document.getElementById('ad-content-wrapper').innerHTML = '<p id="ad-placeholder-text">বিজ্ঞাপন এখানে লোড হবে</p>';
+    }
+</script>
+
+</body>
+                             </html>
+                               
