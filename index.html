@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdsPay BD - Pro</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #00a884;
+            --dark-green: #056162;
+            --gold: #FFD700;
+            --bg: #f0f2f5;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            margin: 0; padding: 0; user-select: none;
+            overflow-x: hidden;
+        }
+
+        /* Splash Screen */
+        #splash-screen {
+            position: fixed; width: 100%; height: 100%;
+            background: var(--dark-green);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 9999; color: white; transition: 0.5s;
+        }
+
+        /* App Bar */
+        .app-bar {
+            background: var(--primary-green); color: white;
+            padding: 15px; display: flex; justify-content: space-between;
+            align-items: center; position: sticky; top: 0; z-index: 100;
+        }
+
+        /* Card Style */
+        .card {
+            background: white; margin: 12px; border-radius: 15px;
+            padding: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            color: white; text-align: center;
+        }
+
+        /* Pages */
+        .page { display: none; padding-bottom: 90px; animation: fadeIn 0.4s; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from {opacity:0; transform: translateY(10px);} to {opacity:1; transform: translateY(0);} }
+
+        /* Buttons */
+        .btn {
+            background: var(--primary-green); color: white; border: none;
+            padding: 14px; border-radius: 12px; width: 100%;
+            font-weight: bold; cursor: pointer; display: flex; 
+            justify-content: center; align-items: center; gap: 8px; margin-top: 10px;
+        }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+        .stat-box { background: #f8f9fa; padding: 12px; border-radius: 10px; text-align: center; border: 1px solid #eee; }
+
+        /* Navigation */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%;
+            background: white; display: flex; justify-content: space-around;
+            padding: 10px 0; border-top: 1px solid #eee; z-index: 1000;
+        }
+        .nav-item { text-align: center; font-size: 11px; color: #8e8e93; cursor: pointer; flex: 1; }
+        .nav-item.active { color: var(--primary-green); }
+        .nav-item i { font-size: 22px; display: block; margin-bottom: 3px; }
+
+        /* Withdraw Method */
+        .method-grid { display: flex; gap: 10px; margin: 10px 0; }
+        .method-item {
+            flex: 1; border: 2px solid #eee; border-radius: 12px; padding: 10px;
+            text-align: center; cursor: pointer;
+        }
+        .method-item.selected { border-color: var(--primary-green); background: #e6f7f3; }
+        .method-item img { width: 40px; border-radius: 5px; }
+
+        input { width: 100%; padding: 12px; margin-top: 8px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+<div id="splash-screen">
+    <i class="fas fa-coins fa-beat" style="font-size: 50px; color: var(--gold);"></i>
+    <h2 style="margin-top:20px;">AdsPay BD PRO</h2>
+</div>
+
+<div class="app-bar">
+    <div style="display:flex; align-items:center;">
+        <img id="u-pfp" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="35" style="border-radius:50%; margin-right:10px;">
+        <div>
+            <b id="u-name">ইউজার</b><br>
+            <small>৳<span class="user-balance">0.00</span></small>
+        </div>
+    </div>
+    <i class="fas fa-crown" style="color:var(--gold);"></i>
+</div>
+
+<div id="home" class="page active">
+    <div class="card balance-card">
+        <p>বর্তমান ব্যালেন্স</p>
+        <h1 style="font-size: 35px; margin: 5px;">৳<span class="user-balance">0.00</span></h1>
+        <small>মিনিমাম উইথড্র ৳১৫০০.০০</small>
+    </div>
+    <div class="card">
+        <h3 style="margin:0;"><i class="fas fa-bullhorn"></i> নোটিশ</h3>
+        <p style="font-size:14px; color:#555;">প্রতিটি বিজ্ঞাপনে ৫ টাকা নিশ্চিত আয়। সঠিক নিয়ম মেনে কাজ করুন।</p>
+    </div>
+</div>
+
+<div id="earn" class="page">
+    <div class="card" style="text-align:center;">
+        <h2 style="color:var(--primary-green); font-size:32px;">৳৫.০০</h2>
+        <div class="stats-grid">
+            <div class="stat-box"><small>আজকের কাজ</small><br><b id="today-ads">0</b></div>
+            <div class="stat-box"><small>আজকের আয়</small><br>৳<b id="today-income">0</b></div>
+        </div>
+        <button class="btn" id="start-ad-btn" onclick="showAd()"><i class="fas fa-play"></i> বিজ্ঞাপন দেখুন</button>
+    </div>
+
+    <div id="ad-container" class="card" style="display:none; text-align:center;">
+        <div id="ad-slot" style="min-height:250px; background:#f9f9f9; border:2px dashed #ccc; display:flex; align-items:center; justify-content:center;">
+            <p id="ad-msg">বিজ্ঞাপন লোড হচ্ছে...</p>
+        </div>
+        <button class="btn" id="claim-btn" disabled onclick="collectReward()">টাকা সংগ্রহ করুন</button>
+    </div>
+</div>
+
+<div id="withdraw" class="page">
+    <div class="card">
+        <h3 style="margin:0;">টাকা উত্তোলন</h3>
+        <div class="method-grid">
+            <div class="method-item selected" onclick="setMethod('bKash', this)">
+                <img src="https://cdn-icons-png.flaticon.com/512/10543/10543202.png"><br><small>bKash</small>
+            </div>
+            <div class="method-item" onclick="setMethod('Nagad', this)">
+                <img src="https://cdn-icons-png.flaticon.com/512/10543/10543232.png"><br><small>Nagad</small>
+            </div>
+        </div>
+        <input type="number" id="account-no" placeholder="একাউন্ট নম্বর">
+        <input type="number" id="amount" placeholder="পরিমাণ (মিনিমাম ১৫০০)">
+        <button class="btn" onclick="requestWithdraw()">রিকোয়েস্ট পাঠান</button>
+    </div>
+</div>
+
+<div id="profile" class="page">
+    <div class="card" style="text-align:center;">
+        <img id="p-img" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="70" style="border-radius:50%; border:2px solid var(--primary-green);">
+        <h2 id="p-name" style="margin:5px 0;">ইউজার নাম</h2>
+        <div class="stats-grid">
+            <div class="stat-box">মোট আয়<br>৳<span class="user-balance">0.00</span></div>
+            <div class="stat-box">রেফার<br><b id="total-ref">0</b></div>
+        </div>
+    </div>
+    <div class="card">
+        <p style="font-weight:bold; font-size:13px;">আপনার রেফার লিঙ্ক:</p>
+        <div style="display:flex; gap:5px;">
+            <input type="text" id="ref-link" readonly value="Loading...">
+            <button class="btn" style="width:70px; margin:8px 0 0 0;" onclick="copyRef()">Copy</button>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item active" onclick="switchPage('home')"><i class="fas fa-home"></i>হোম</div>
+    <div class="nav-item" onclick="switchPage('earn')"><i class="fas fa-play"></i>কাজ</div>
+    <div class="nav-item" onclick="switchPage('withdraw')"><i class="fas fa-wallet"></i>উইথড্র</div>
+    <div class="nav-item" onclick="switchPage('profile')"><i class="fas fa-user"></i>প্রোফাইল</div>
+</div>
+
+<script>
+    let balance = parseFloat(localStorage.getItem('userBalance')) || 0;
+    let totalAds = parseInt(localStorage.getItem('totalAds')) || 0;
+    let selectedMethod = 'bKash';
+    const tg = window.Telegram.WebApp;
+
+    window.onload = () => {
+        updateUI();
+        setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 2000);
+        tg.expand();
+        if(tg.initDataUnsafe.user) {
+            const user = tg.initDataUnsafe.user;
+            document.getElementById('u-name').innerText = user.first_name;
+            document.getElementById('p-name').innerText = user.first_name;
+            document.getElementById('ref-link').value = "https://t.me/AdsPayBDBot?start=" + user.id;
+        }
+    };
+
+    function switchPage(p) {
+        document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+        document.getElementById(p).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    function setMethod(m, el) {
+        selectedMethod = m;
+        document.querySelectorAll('.method-item').forEach(i => i.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+
+    // --- বিজ্ঞাপন সিস্টেম (SDK Integration) ---
+    function showAd() {
+        document.getElementById('ad-container').style.display = 'block';
+        document.getElementById('start-ad-btn').style.display = 'none';
+        
+        // অ্যাড স্ক্রিপ্ট ইনজেকশন
+        const adSlot = document.getElementById('ad-slot');
+        adSlot.innerHTML = ""; 
+        const script = document.createElement('script');
+        script.src = "//libtl.com/sdk.js";
+        script.setAttribute('data-zone', '10981207');
+        script.setAttribute('data-sdk', 'show_10981207');
+        adSlot.appendChild(script);
+
+        let timer = 5; // ৫ সেকেন্ড টাইমার
+        let btn = document.getElementById('claim-btn');
+        btn.disabled = true;
+
+        let cd = setInterval(() => {
+            btn.innerText = `অপেক্ষা করুন (${timer}s)`;
+            timer--;
+            if(timer < 0) {
+                clearInterval(cd);
+                btn.disabled = false;
+                btn.innerText = "টাকা সংগ্রহ করুন";
+                document.getElementById('ad-msg').innerText = "বিজ্ঞাপন সম্পন্ন!";
+            }
+        }, 1000);
+    }
+
+    function collectReward() {
+        balance += 5.0;
+        totalAds++;
+        localStorage.setItem('userBalance', balance);
+        localStorage.setItem('totalAds', totalAds);
+        updateUI();
+        alert("৳৫.০০ আপনার ব্যালেন্সে যোগ হয়েছে!");
+        document.getElementById('ad-container').style.display = 'none';
+        document.getElementById('start-ad-btn').style.display = 'flex';
+        document.getElementById('ad-msg').innerText = "বিজ্ঞাপন লোড হচ্ছে...";
+    }
+
+    function requestWithdraw() {
+        let amt = document.getElementById('amount').value;
+        if(balance < 1500 || amt < 1500) { alert("মিনিমাম ১৫০০ টাকা প্রয়োজন!"); return; }
+        alert("উইথড্র রিকোয়েস্ট সফল হয়েছে!");
+        balance -= amt;
+        localStorage.setItem('userBalance', balance);
+        updateUI();
+    }
+
+    function updateUI() {
+        document.querySelectorAll('.user-balance').forEach(el => el.innerText = balance.toFixed(2));
+        document.getElementById('today-ads').innerText = totalAds;
+        document.getElementById('today-income').innerText = (totalAds * 5).toFixed(2);
+    }
+
+    function copyRef() {
+        const copyText = document.getElementById("ref-link");
+        copyText.select();
+        document.execCommand("copy");
+        alert("রেফার লিঙ্ক কপি হয়েছে!");
+    }
+</script>
+</body>
+  </html>
+  
