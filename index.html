@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdsPay BD - Pro</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #00a884;
+            --dark-green: #056162;
+            --gold: #FFD700;
+            --bg: #f0f2f5;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg);
+            margin: 0; padding: 0; user-select: none;
+        }
+
+        /* Splash Screen */
+        #splash-screen {
+            position: fixed; width: 100%; height: 100%;
+            background: var(--dark-green);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            z-index: 9999; color: white; transition: 0.5s;
+        }
+
+        /* App Bar */
+        .app-bar {
+            background: var(--primary-green); color: white;
+            padding: 15px; display: flex; justify-content: space-between;
+            align-items: center; position: sticky; top: 0; z-index: 100;
+        }
+
+        /* Banner Style */
+        .promo-banner {
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            margin: 15px; border-radius: 15px; height: 160px;
+            display: flex; align-items: center; justify-content: space-around;
+            color: white; overflow: hidden; position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .promo-text h2 { margin: 0; font-size: 22px; color: var(--gold); }
+        .promo-img img { width: 100px; filter: drop-shadow(2px 4px 6px black); }
+
+        /* Card Style */
+        .card {
+            background: white; margin: 15px; border-radius: 15px;
+            padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            color: white; text-align: center;
+        }
+
+        /* Leaderboard Table */
+        .leaderboard-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .leaderboard-table tr { border-bottom: 1px solid #eee; }
+        .leaderboard-table td { padding: 12px 5px; font-size: 14px; }
+        .rank { width: 30px; font-weight: bold; color: var(--primary-green); }
+        .top-rank { color: #ff9800; }
+
+        /* Navigation */
+        .bottom-nav {
+            position: fixed; bottom: 0; width: 100%;
+            background: white; display: flex; justify-content: space-around;
+            padding: 10px 0; border-top: 1px solid #eee; z-index: 1000;
+        }
+        .nav-item { text-align: center; font-size: 11px; color: #8e8e93; cursor: pointer; flex: 1; }
+        .nav-item.active { color: var(--primary-green); }
+        .nav-item i { font-size: 20px; display: block; margin-bottom: 3px; }
+
+        .page { display: none; padding-bottom: 80px; animation: fadeIn 0.4s; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+
+        .btn {
+            background: var(--primary-green); color: white; border: none;
+            padding: 12px; border-radius: 10px; width: 100%;
+            font-weight: bold; cursor: pointer; display: flex; 
+            justify-content: center; align-items: center; gap: 8px;
+        }
+
+        #ad-box { 
+            min-height: 250px; background: #fafafa; 
+            border: 2px dashed #ccc; display: flex; 
+            align-items: center; justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+<div id="splash-screen">
+    <i class="fas fa-wallet fa-beat" style="font-size: 50px;"></i>
+    <h2>AdsPay BD PRO</h2>
+    <p>Loading Success...</p>
+</div>
+
+<div class="app-bar">
+    <div style="display:flex; align-items:center;">
+        <img id="u-pfp" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="35" style="border-radius:50%; margin-right:10px; border:2px solid #fff;">
+        <div>
+            <b id="u-name" style="font-size:14px;">User</b><br>
+            <small>Balance: ৳<span class="user-balance">0.00</span></small>
+        </div>
+    </div>
+    <i class="fas fa-crown" style="color:var(--gold);"></i>
+</div>
+
+<div id="home" class="page active">
+    <div class="promo-banner">
+        <div class="promo-text">
+            <h2>Unlimited Income</h2>
+            <p>প্রতিদিন ৫০০-১০০০ টাকা <br>আয় করুন ঘরে বসেই!</p>
+        </div>
+        <div class="promo-img">
+            <img src="https://cdn-icons-png.flaticon.com/512/2168/2168517.png">
+        </div>
+    </div>
+
+    <div class="card balance-card">
+        <p style="margin:0;">Current Balance</p>
+        <h1 style="margin:5px 0;">৳<span class="user-balance">0.00</span></h1>
+        <small>মিনিমাম উইথড্র ১৫০০ টাকা</small>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0;"><i class="fas fa-trophy top-rank"></i> Top Earners</h3>
+        <table class="leaderboard-table">
+            <tr><td class="rank top-rank">1</td><td>Sakib Ahmed</td><td>৳৫৮৪০</td></tr>
+            <tr><td class="rank top-rank">2</td><td>Mitu Islam</td><td>৳৫১২০</td></tr>
+            <tr><td class="rank top-rank">3</td><td>Rakib Hossain</td><td>৳৪৬০০</td></tr>
+            <tr><td class="rank">4</td><td>Ariful Khan</td><td>৳৩৯০০</td></tr>
+            <tr><td class="rank">5</td><td>Sumi Akter</td><td>৳৩২০০</td></tr>
+        </table>
+    </div>
+</div>
+
+<div id="earn" class="page">
+    <div class="card" style="text-align:center;">
+        <p>প্রতি ক্লিকে পাবেন</p>
+        <h2 style="color:var(--primary-green); font-size:35px; margin:10px;">৳৫.০০</h2>
+        <div style="display:flex; justify-content:space-around; margin-bottom:15px;">
+            <div><small>আজকের কাজ</small><br><b id="today-ads">0</b></div>
+            <div><small>আজকের আয়</small><br>৳<b id="today-income">0</b></div>
+        </div>
+        <button class="btn" id="start-ad-btn" onclick="showAd()"><i class="fas fa-play"></i> বিজ্ঞাপন দেখুন</button>
+    </div>
+
+    <div id="ad-container" class="card" style="display:none; text-align:center;">
+        <div id="ad-box">
+            <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-YOUR_ID" crossorigin="anonymous"></script>
+            <p style="color:#888;">বিজ্ঞাপন লোড হচ্ছে...</p>
+        </div>
+        <br>
+        <button class="btn" id="claim-btn" disabled onclick="collectReward()">Claim Reward</button>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item active" onclick="switchPage('home')"><i class="fas fa-home"></i>হোম</div>
+    <div class="nav-item" onclick="switchPage('earn')"><i class="fas fa-coins"></i>আয় করুন</div>
+    <div class="nav-item" onclick="switchPage('profile')"><i class="fas fa-user"></i>প্রোফাইল</div>
+</div>
+
+<script>
+    let balance = 0.00;
+    let totalAds = 0;
+    const tg = window.Telegram.WebApp;
+
+    window.onload = () => {
+        if(localStorage.getItem('userBalance')) {
+            balance = parseFloat(localStorage.getItem('userBalance'));
+            totalAds = parseInt(localStorage.getItem('totalAds'));
+            updateUI();
+        }
+        setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 2000);
+        
+        tg.expand();
+        if(tg.initDataUnsafe.user) {
+            document.getElementById('u-name').innerText = tg.initDataUnsafe.user.first_name;
+        }
+    };
+
+    function switchPage(p) {
+        document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+        document.getElementById(p).classList.add('active');
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    function showAd() {
+        document.getElementById('ad-container').style.display = 'block';
+        document.getElementById('start-ad-btn').style.display = 'none';
+        
+        // অ্যাড স্ক্রিপ্ট লোড করার ট্রিক
+        const script = document.createElement('script');
+        script.src = "//libtl.com/sdk.js";
+        script.setAttribute('data-zone', '10981207');
+        script.setAttribute('data-sdk', 'show_10981207');
+        document.getElementById('ad-box').appendChild(script);
+
+        let timer = 5; // ৫ সেকেন্ড অ্যাড দেখা বাধ্যতামূলক
+        let btn = document.getElementById('claim-btn');
+        btn.disabled = true;
+        
+        let cd = setInterval(() => {
+            timer--;
+            btn.innerText = `Wait (${timer}s)`;
+            if(timer <= 0) {
+                clearInterval(cd);
+                btn.disabled = false;
+                btn.innerText = "টাকা সংগ্রহ করুন";
+            }
+        }, 1000);
+    }
+
+    function collectReward() {
+        balance += 5.00;
+        totalAds++;
+        localStorage.setItem('userBalance', balance);
+        localStorage.setItem('totalAds', totalAds);
+        updateUI();
+        alert("অভিনন্দন! ৫ টাকা সফলভাবে যোগ হয়েছে।");
+        document.getElementById('ad-container').style.display = 'none';
+        document.getElementById('start-ad-btn').style.display = 'flex';
+        document.getElementById('ad-box').innerHTML = '<p style="color:#888;">বিজ্ঞাপন লোড হচ্ছে...</p>';
+    }
+
+    function updateUI() {
+        document.querySelectorAll('.user-balance').forEach(el => el.innerText = balance.toFixed(2));
+        document.getElementById('today-ads').innerText = totalAds;
+        document.getElementById('today-income').innerText = (totalAds * 5);
+    }
+</script>
+
+</body>
+  </html>
+      
