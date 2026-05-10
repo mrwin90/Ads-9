@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AdsPay BD - Earn Money</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --tg-theme-bg-color: #f0f2f5;
+            --tg-theme-button-color: #0088cc;
+            --primary-green: #00a884;
+            --dark-green: #056162;
+            --accent-blue: #0088cc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--tg-theme-bg-color);
+            margin: 0;
+            padding: 0;
+            color: #333;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        /* Splash Screen */
+        #splash-screen {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: #056162;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            transition: 0.5s;
+        }
+
+        /* App Bar */
+        .app-bar {
+            background: var(--primary-green);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Card Style */
+        .card {
+            background: white;
+            margin: 15px;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            color: white;
+            text-align: center;
+        }
+
+        .balance-amount {
+            font-size: 35px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        /* Pages Animation */
+        .page {
+            display: none;
+            padding-bottom: 90px;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .page.active { display: block; }
+
+        /* Buttons */
+        .btn {
+            background: var(--primary-green);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .stat-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 1px solid #eee;
+            z-index: 1000;
+        }
+        .nav-item {
+            text-align: center;
+            font-size: 11px;
+            color: #8e8e93;
+            cursor: pointer;
+            flex: 1;
+        }
+        .nav-item i { font-size: 22px; margin-bottom: 4px; display: block; }
+        .nav-item.active { color: var(--primary-green); }
+
+        /* Method Selector */
+        .method-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .method-item {
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .method-item.selected {
+            border-color: #e2136e;
+            background: #fff0f5;
+        }
+        .method-item img { width: 45px; height: 45px; margin-bottom: 5px; border-radius: 8px; }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        #ad-container { display: none; text-align: center; border: 2px dashed var(--primary-green); }
+    </style>
+</head>
+<body>
+
+<div id="splash-screen">
+    <i class="fas fa-coins fa-spin" style="font-size: 50px; margin-bottom: 15px;"></i>
+    <h2 style="margin:0;">AdsPay BD</h2>
+    <p style="opacity: 0.8;">লোডিং হচ্ছে...</p>
+</div>
+
+<div class="app-bar">
+    <div style="display:flex; align-items:center;">
+        <img id="user-pfp" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="38" style="border-radius:50%; border: 2px solid white; margin-right:10px;">
+        <div>
+            <span id="user-name" style="font-weight:bold; display:block; font-size: 14px;">ইউজার</span>
+            <span style="font-size:11px; opacity: 0.9;">ব্যালেন্স: ৳<span class="user-balance">0.00</span></span>
+        </div>
+    </div>
+    <i class="fas fa-bell"></i>
+</div>
+
+<div id="home" class="page active">
+    <div class="card balance-card">
+        <p style="margin:0; font-size:14px;">আপনার বর্তমান ব্যালেন্স</p>
+        <div class="balance-amount">৳<span class="user-balance">0.00</span></div>
+        <div style="font-size:12px; background: rgba(0,0,0,0.1); padding: 5px; border-radius: 20px;">
+            মিনিমাম উত্তোলন: ৳১৫০০.০০
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top:0; color: var(--dark-green);"><i class="fas fa-bullhorn"></i> অফিশিয়াল নোটিশ</h3>
+        <p style="font-size: 14px; line-height: 1.5; color: #555;">
+            প্রতিটি বিজ্ঞাপনে ৫ টাকা পাবেন। আনলিমিটেড কাজ করুন। পেমেন্ট নিতে অবশ্যই ১০টি রেফার থাকতে হবে। সঠিক নিয়ম মেনে কাজ করুন।
+        </p>
+        <button class="btn" onclick="switchPage('earn')">কাজ শুরু করুন <i class="fas fa-arrow-right"></i></button>
+    </div>
+</div>
+
+<div id="earn" class="page">
+    <div class="card" style="text-align: center;">
+        <p style="margin-bottom: 5px;">বিজ্ঞাপন থেকে আয়</p>
+        <h2 style="color: var(--primary-green); font-size: 38px; margin: 10px 0;">৳৫.০০</h2>
+        <div class="stats-grid">
+            <div class="stat-box"><small>আজকের কাজ</small><br><b id="today-ads">0</b> টি</div>
+            <div class="stat-box"><small>আজকের আয়</small><br>৳<b id="today-income">0</b></div>
+        </div>
+        <br>
+        <button class="btn" id="start-ad-btn" onclick="showAd()">
+            <i class="fas fa-play-circle"></i> বিজ্ঞাপন শুরু করুন
+        </button>
+    </div>
+
+    <div id="ad-container" class="card">
+        <p style="font-weight:bold; color:var(--dark-green);">বিজ্ঞাপন লোড হয়েছে</p>
+        <script src='//libtl.com/sdk.js' data-zone='10981207' data-sdk='show_10981207'></script>
+        <br>
+        <button class="btn" id="claim-btn" disabled onclick="collectReward()">টাকা সংগ্রহ করুন</button>
+    </div>
+</div>
+
+<div id="withdraw" class="page">
+    <div class="card">
+        <h3 style="margin-top:0;"><i class="fas fa-wallet"></i> টাকা উত্তোলন</h3>
+        <p style="font-size:13px; color:#666;">পেমেন্ট মেথড সিলেক্ট করুন:</p>
+        <div class="method-grid">
+            <div class="method-item" onclick="selectMethod(this, 'Bkash')">
+                <img src="https://www.logo.wine/a/logo/BKash/BKash-Icon-Logo.wine.svg">
+                <br>বিকাশ
+            </div>
+            <div class="method-item" onclick="selectMethod(this, 'Nagad')">
+                <img src="https://download.logo.wine/logo/Nagad/Nagad-Vertical-Logo.wine.png">
+                <br>নগদ
+            </div>
+            <div class="method-item" onclick="selectMethod(this, 'Rocket')">
+                <img src="https://www.logo.wine/a/logo/Dutch-Bangla_Bank/Dutch-Bangla_Bank-Logo.wine.svg">
+                <br>রকেট
+            </div>
+        </div>
+
+        <input type="number" id="wd-number" placeholder="আপনার একাউন্ট নম্বর (017...)">
+        <input type="number" id="wd-amount" placeholder="টাকার পরিমাণ (মিনিমাম ১৫০০)">
+        
+        <button id="withdraw-btn" class="btn" style="margin-top:15px;" onclick="processWithdraw()">উত্তোলন রিকোয়েস্ট পাঠান</button>
+    </div>
+</div>
+
+<div id="support" class="page">
+    <div class="card" style="text-align:center;">
+        <i class="fab fa-telegram" style="font-size: 60px; color: var(--accent-blue);"></i>
+        <h2>সহায়তা কেন্দ্র</h2>
+        <button class="btn" style="background:#0088cc;" onclick="window.open('https://t.me/Online_Free_Income_09')">অ্যাডমিন ইনবক্স</button>
+        <button class="btn" style="background:#0088cc; margin-top:10px;" onclick="window.open('https://t.me/Online_Free_Income_95')">অফিশিয়াল চ্যানেল</button>
+        <button class="btn" style="background:#ff0000; margin-top:10px;" onclick="window.open('https://www.youtube.com/@Online_Fre_Income_95')">ইউটিউব সাবস্ক্রাইব</button>
+    </div>
+</div>
+
+<div id="profile" class="page">
+    <div class="card" style="text-align:center;">
+        <img id="profile-img" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="80" style="border-radius:50%; border: 3px solid var(--primary-green); padding: 3px;">
+        <h2 id="profile-name">লোডিং...</h2>
+        <p style="color:#777; font-size:13px;">আইডি: <span id="profile-id">000000</span></p>
+        
+        <div class="stats-grid">
+            <div class="stat-box">মোট আয়<br>৳<span class="user-balance">0.00</span></div>
+            <div class="stat-box">মোট রেফার<br><b id="total-refers">0</b> জন</div>
+        </div>
+    </div>
+    <div class="card">
+        <p style="margin-bottom: 8px; font-weight: bold;">রেফার লিংক:</p>
+        <div style="display:flex; gap:5px;">
+            <input type="text" readonly id="ref-link" value="লোডিং...">
+            <button onclick="copyRef()" style="background:var(--accent-blue); color:white; border:none; padding:10px; border-radius:10px;">Copy</button>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item active" onclick="switchPage('home')"><i class="fas fa-home"></i>হোম</div>
+    <div class="nav-item" onclick="switchPage('earn')"><i class="fas fa-th-large"></i>আয় করুন</div>
+    <div class="nav-item" onclick="switchPage('support')"><i class="fas fa-headset"></i>সাপোর্ট</div>
+    <div class="nav-item" onclick="switchPage('withdraw')"><i class="fas fa-wallet"></i>উইথড্র</div>
+    <div class="nav-item" onclick="switchPage('profile')"><i class="fas fa-user-circle"></i>প্রোফাইল</div>
+</div>
+
+<script>
+    let balance = 0.00;
+    let totalAds = 0;
+    let refers = 0; // এটি ব্যাকএন্ড থেকে চেক করা উচিত
+    let selectedMethod = "";
+    const tg = window.Telegram.WebApp;
+
+    // ১. অ্যাপ শুরু এবং ডাটা রিকভারি
+    window.onload = () => {
+        // LocalStorage থেকে ডাটা লোড করা
+        if(localStorage.getItem('userBalance')) {
+            balance = parseFloat(localStorage.getItem('userBalance'));
+            totalAds = parseInt(localStorage.getItem('totalAds'));
+            updateUI();
+        }
+
+        setTimeout(() => {
+            document.getElementById('splash-screen').style.opacity = '0';
+            setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 500);
+        }, 2000);
+
+        tg.expand();
+        if(tg.initDataUnsafe.user) {
+            const user = tg.initDataUnsafe.user;
+            document.getElementById('user-name').innerText = user.first_name;
+            document.getElementById('profile-name').innerText = user.first_name;
+            document.getElementById('profile-id').innerText = user.id;
+            document.getElementById('ref-link').value = "https://t.me/AdsPayBDBot?start=" + user.id;
+        }
+    };
+
+    // ২. পেজ পরিবর্তন
+    function switchPage(pageId) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        
+        document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+    }
+
+    // ৩. বিজ্ঞাপন দেখা এবং ১ সেকেন্ড টাইমার
+    function showAd() {
+        document.getElementById('ad-container').style.display = 'block';
+        document.getElementById('start-ad-btn').style.display = 'none';
+        
+        let btn = document.getElementById('claim-btn');
+        let timer = 1; 
+        
+        btn.disabled = true;
+        btn.innerText = `অপেক্ষা করুন (${timer}s)`;
+        
+        let countdown = setInterval(() => {
+            timer--;
+            if(timer <= 0) {
+                clearInterval(countdown);
+                btn.disabled = false;
+                btn.innerText = "টাকা সংগ্রহ করুন";
+            } else {
+                btn.innerText = `অপেক্ষা করুন (${timer}s)`;
+            }
+        }, 1000);
+    }
+
+    // ৪. টাকা সংগ্রহ এবং LocalStorage এ সেভ
+    function collectReward() {
+        balance += 5.00;
+        totalAds++;
+        updateUI();
+        
+        // ব্রাউজার মেমোরিতে সেভ
+        localStorage.setItem('userBalance', balance);
+        localStorage.setItem('totalAds', totalAds);
+
+        document.getElementById('ad-container').style.display = 'none';
+        document.getElementById('start-ad-btn').style.display = 'flex';
+        document.getElementById('claim-btn').disabled = true;
+        tg.HapticFeedback.notificationOccurred('success');
+        alert("অভিনন্দন! ৫ টাকা যোগ হয়েছে।");
+    }
+
+    function updateUI() {
+        document.querySelectorAll('.user-balance').forEach(el => el.innerText = balance.toFixed(2));
+        document.getElementById('today-ads').innerText = totalAds;
+        document.getElementById('today-income').innerText = (totalAds * 5);
+    }
+
+    // ৫. উইথড্র প্রসেস
+    function selectMethod(el, method) {
+        document.querySelectorAll('.method-item').forEach(m => m.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedMethod = method;
+    }
+
+    function processWithdraw() {
+        let amount = parseFloat(document.getElementById('wd-amount').value);
+        let number = document.getElementById('wd-number').value;
+
+        if(balance < 1500) { alert("মিনিমাম ১৫০০ টাকা লাগবে!"); return; }
+        if(!selectedMethod || !number) { alert("সব তথ্য দিন!"); return; }
+
+        const msg = `💰 *New Withdraw*\n👤 User: ${tg.initDataUnsafe.user?.first_name}\n💳 Method: ${selectedMethod}\n📱 No: ${number}\n💵 Amount: ${amount} BDT`;
+
+        fetch(`https://api.telegram.org/bot8790752659:AAFW56dhcqMjoPgXQTiBKuPyHnjsjot33_E/sendMessage?chat_id=8598824562&text=${encodeURIComponent(msg)}&parse_mode=Markdown`)
+        .then(() => {
+            alert("রিকোয়েস্ট পাঠানো হয়েছে!");
+            balance -= amount;
+            localStorage.setItem('userBalance', balance);
+            updateUI();
+        });
+    }
+
+    function copyRef() {
+        const link = document.getElementById('ref-link');
+        link.select();
+        document.execCommand('copy');
+        alert("লিংক কপি হয়েছে!");
+    }
+</script>
+</body>
+</html>
